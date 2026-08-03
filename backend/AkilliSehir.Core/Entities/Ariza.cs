@@ -40,6 +40,12 @@ public class Ariza
 
     public DateTime KayitTarihi { get; set; }
 
+    // Bildirimin sahibi, vatandaşın yalnızca kendi kayıtlarını takip edebilmesi
+    // için sunucuda doğrulanmış JWT kimliğiyle ilişkilendirilir.
+    public int? BildirimiYapanVatandasId { get; set; }
+
+    public Kullanici? BildirimiYapanVatandas { get; set; }
+
     // Atama yapılmadığında null kalabilen yabancı anahtar.
     public int? AtananPersonelId { get; set; }
 

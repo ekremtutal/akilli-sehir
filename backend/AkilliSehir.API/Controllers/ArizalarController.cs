@@ -28,6 +28,22 @@ public class ArizalarController : ControllerBase
         _yonlendirmeService = yonlendirmeService;
     }
 
+    [HttpGet("benim")]
+    [Authorize(Roles = nameof(KullaniciRolu.Vatandas))]
+    [ProducesResponseType(typeof(IReadOnlyList<ArizaDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<IReadOnlyList<ArizaDto>>> GetMine(
+        CancellationToken cancellationToken)
+    {
+        if (!User.TryGetKullaniciId(out var vatandasId))
+        {
+            return Forbid();
+        }
+
+        var arizalar = await _arizaService.GetByVatandasIdAsync(vatandasId, cancellationToken);
+        return Ok(arizalar.Select(ArizaDto.FromEntity));
+    }
+
     [HttpGet]
     [Authorize(Roles = nameof(KullaniciRolu.SahaPersoneli))]
     [ProducesResponseType(typeof(IReadOnlyList<ArizaDto>), StatusCodes.Status200OK)]
@@ -76,6 +92,11 @@ public class ArizalarController : ControllerBase
         [FromBody] ArizaOlusturmaIstek istek,
         CancellationToken cancellationToken)
     {
+        if (!User.TryGetKullaniciId(out var vatandasId))
+        {
+            return Forbid();
+        }
+
         // Yönlendirme kararı; metin, kategori, vatandaş tercihi ve fotoğraf URL'si
         // üzerinden uygulama katmanında üretilir.
         var yonlendirme = await _yonlendirmeService.YonlendirAsync(
@@ -102,7 +123,8 @@ public class ArizalarController : ControllerBase
             VatandasSecilenBirim = istek.VatandasSecilenBirim,
             YonlendirilenBirim = yonlendirme.OnerilenBirim,
             YapayZekaGuvenSkoru = yonlendirme.GuvenSkoru,
-            YapayZekaGerekcesi = yonlendirme.Gerekce
+            YapayZekaGerekcesi = yonlendirme.Gerekce,
+            BildirimiYapanVatandasId = vatandasId
         };
 
         var olusturulanAriza = await _arizaService.AddAsync(ariza, cancellationToken);

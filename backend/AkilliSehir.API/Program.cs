@@ -56,6 +56,8 @@ builder.Services.AddDbContext<CityDbContext>(options =>
 
 // Servis sözleşmeleri ve somut yöneticileri istek başına oluşturulur.
 builder.Services.AddScoped<IArizaService, ArizaManager>();
+builder.Services.AddScoped<IDuyuruService, DuyuruManager>();
+builder.Services.AddScoped<IRandevuService, RandevuManager>();
 builder.Services.AddScoped<IKullaniciService, KullaniciManager>();
 builder.Services.AddScoped<IAuthService, AuthManager>();
 builder.Services.AddScoped<IArizaYonlendirmeService, ArizaYonlendirmeManager>();

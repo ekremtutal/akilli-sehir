@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Yakınınızdaki belediye duyurularını göstermek için konumunuza erişiriz.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Sehirtakip App</string>
 	<key>CFBundleExecutable</key>

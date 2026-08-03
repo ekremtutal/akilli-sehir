@@ -44,7 +44,12 @@ abstract final class ApiConfig {
   static const personnelLogin = '/api/Auth/personel-giris';
   static const citizenRegister = '/api/Auth/vatandas-kayit';
   static const complaints = '/api/Arizalar';
+  static const myComplaints = '/api/Arizalar/benim';
   static const complaintPhoto = '/api/Dosyalar/ariza-fotografi';
+  static const announcements = '/api/Duyurular';
+  static const appointments = '/api/Randevular';
+  static const myAppointments = '/api/Randevular/benim';
+  static const availableAppointmentTimes = '/api/Randevular/uygun-saatler';
   static const openStreetMapTiles =
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 }

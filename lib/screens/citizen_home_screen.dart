@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_constants.dart';
 import '../models/user_session.dart';
+import 'appointment_screen.dart';
+import 'announcements_screen.dart';
 import 'complaint_report_screen.dart';
+import 'my_complaints_screen.dart';
 import 'role_selection_screen.dart';
 
 /// Vatandaş oturumunun ana kabuğu; ana sayfa, bildirim formu ve hesap sekmelerini yönetir.
@@ -24,6 +27,12 @@ class _CitizenHomeScreenState extends State<CitizenHomeScreen> {
       _CitizenDashboard(
         session: widget.session,
         openReport: () => setState(() => _selectedTab = 1),
+        openComplaintTracking: () =>
+            _openPage(MyComplaintsScreen(session: widget.session)),
+        openAnnouncements: () =>
+            _openPage(AnnouncementsScreen(session: widget.session)),
+        openAppointments: () =>
+            _openPage(AppointmentScreen(session: widget.session)),
       ),
       ComplaintReportScreen(session: widget.session),
       _CitizenAccountScreen(session: widget.session),
@@ -55,13 +64,26 @@ class _CitizenHomeScreenState extends State<CitizenHomeScreen> {
       ),
     );
   }
+
+  void _openPage(Widget page) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
 }
 
 class _CitizenDashboard extends StatelessWidget {
-  const _CitizenDashboard({required this.session, required this.openReport});
+  const _CitizenDashboard({
+    required this.session,
+    required this.openReport,
+    required this.openComplaintTracking,
+    required this.openAnnouncements,
+    required this.openAppointments,
+  });
 
   final UserSession session;
   final VoidCallback openReport;
+  final VoidCallback openComplaintTracking;
+  final VoidCallback openAnnouncements;
+  final VoidCallback openAppointments;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +120,8 @@ class _CitizenDashboard extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      tooltip: 'Arıza bildirimlerim',
+                      onPressed: openComplaintTracking,
                       icon: const Icon(Icons.notifications_none_rounded),
                     ),
                   ],
@@ -128,26 +151,29 @@ class _CitizenDashboard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _QuickActionCard(
-                        icon: Icons.add_location_alt_rounded,
-                        title: 'Arıza bildir',
+                        icon: Icons.assignment_turned_in_outlined,
+                        title: 'Arıza takibi',
                         color: const Color(0xFFE1EFFF),
-                        onTap: openReport,
+                        onTap: openComplaintTracking,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _QuickActionCard(
-                        icon: Icons.support_agent_rounded,
-                        title: 'Destek al',
+                        icon: Icons.campaign_outlined,
+                        title: 'Mahalle duyuruları',
                         color: const Color(0xFFE8F5E9),
-                        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Destek merkezi yakında burada.'),
-                          ),
-                        ),
+                        onTap: openAnnouncements,
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                _WideQuickActionCard(
+                  icon: Icons.calendar_month_rounded,
+                  title: 'Belediye randevusu al',
+                  description: 'Birim, gün ve uygun saati kolayca seç.',
+                  onTap: openAppointments,
                 ),
                 const SizedBox(height: 28),
                 const Text(
@@ -264,6 +290,69 @@ class _QuickActionCard extends StatelessWidget {
               Icon(icon, color: AppColors.navy),
               const Spacer(),
               Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WideQuickActionCard extends StatelessWidget {
+  const _WideQuickActionCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEADD),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(icon, color: AppColors.orange),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.blueGrey),
             ],
           ),
         ),

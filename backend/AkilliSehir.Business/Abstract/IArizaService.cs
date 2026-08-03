@@ -15,6 +15,10 @@ public interface IArizaService
 
     Task<Ariza?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Ariza>> GetByVatandasIdAsync(
+        int vatandasId,
+        CancellationToken cancellationToken = default);
+
     Task<Ariza> AddAsync(Ariza ariza, CancellationToken cancellationToken = default);
 
     Task<ArizaDurumGuncellemeSonucu> UpdateStatusAsync(

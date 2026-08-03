@@ -48,6 +48,18 @@ public sealed class ArizaManager : IArizaService
             .FirstOrDefaultAsync(ariza => ariza.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Ariza>> GetByVatandasIdAsync(
+        int vatandasId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Arizalar
+            .AsNoTracking()
+            .Include(ariza => ariza.AtananPersonel)
+            .Where(ariza => ariza.BildirimiYapanVatandasId == vatandasId)
+            .OrderByDescending(ariza => ariza.KayitTarihi)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Ariza> AddAsync(
         Ariza ariza,
         CancellationToken cancellationToken = default)

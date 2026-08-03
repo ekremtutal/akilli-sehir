@@ -34,4 +34,10 @@ public class Kullanici
 
     // Kullanıcıya atanmış arıza kayıtları için 1-N navigation property'si.
     public ICollection<Ariza> AtananArizalar { get; set; } = new List<Ariza>();
+
+    // Vatandaşın oluşturduğu arıza kayıtları için 1-N navigation property'si.
+    public ICollection<Ariza> BildirilenArizalar { get; set; } = new List<Ariza>();
+
+    // Vatandaşın oluşturduğu belediye randevuları için 1-N navigation property'si.
+    public ICollection<Randevu> Randevular { get; set; } = new List<Randevu>();
 }

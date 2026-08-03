@@ -18,6 +18,10 @@ public class CityDbContext : DbContext
 
     public DbSet<Ariza> Arizalar => Set<Ariza>();
 
+    public DbSet<Duyuru> Duyurular => Set<Duyuru>();
+
+    public DbSet<Randevu> Randevular => Set<Randevu>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Fluent API sınıfları otomatik olarak uygulanır.

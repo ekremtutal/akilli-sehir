@@ -40,7 +40,10 @@ public sealed class DosyalarController : ControllerBase
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status413PayloadTooLarge)]
     public async Task<ActionResult<ArizaFotografiYuklemeSonucu>> ArizaFotografiYukle(
-        [FromForm] IFormFile? fotograf,
+        // IFormFile, ASP.NET Core tarafından otomatik olarak multipart/form-data
+        // kaynağından bağlanır. [FromForm] eklenmediğinde Swagger bu alanı doğru
+        // şekilde dosya seçici olarak belgeleyebilir.
+        IFormFile? fotograf,
         CancellationToken cancellationToken)
     {
         if (fotograf is null || fotograf.Length == 0)

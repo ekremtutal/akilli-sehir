@@ -65,6 +65,14 @@ public sealed class ArizaConfiguration : IEntityTypeConfiguration<Ariza>
             .HasColumnType("datetime2")
             .HasDefaultValueSql("SYSUTCDATETIME()");
 
+        // Arıza geçmişi kaybolmamalıdır. Atanan personel ilişkisi zaten SET NULL
+        // kullandığı için SQL Server'ın çoklu cascade path kuralına takılmamak adına
+        // vatandaş hesabı silinmeden önce bu ilişki uygulama katmanında yönetilir.
+        builder.HasOne(ariza => ariza.BildirimiYapanVatandas)
+            .WithMany(kullanici => kullanici.BildirilenArizalar)
+            .HasForeignKey(ariza => ariza.BildirimiYapanVatandasId)
+            .OnDelete(DeleteBehavior.NoAction);
+
         // Bir personel birçok arızaya atanabilir; bir arızanın en fazla bir
         // atanmış personeli bulunur. Personel silinirse atama null'a çekilir.
         builder.HasOne(ariza => ariza.AtananPersonel)
@@ -73,5 +81,6 @@ public sealed class ArizaConfiguration : IEntityTypeConfiguration<Ariza>
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(ariza => new { ariza.YonlendirilenBirim, ariza.Durum });
+        builder.HasIndex(ariza => new { ariza.BildirimiYapanVatandasId, ariza.KayitTarihi });
     }
 }

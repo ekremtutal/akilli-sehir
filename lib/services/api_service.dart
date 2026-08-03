@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import '../constants/app_constants.dart';
 import '../models/api_exception.dart';
 import '../models/ariza_model.dart';
+import '../models/duyuru_model.dart';
+import '../models/randevu_model.dart';
 import '../models/user_session.dart';
 
 /// Uygulamanın HTTP erişimi için tek giriş noktasıdır.
@@ -117,6 +119,121 @@ class ApiService {
         .toList();
   }
 
+  /// Vatandaşın yalnızca kendi hesabıyla oluşturduğu arıza kayıtlarını getirir.
+  Future<List<ArizaModel>> getMyComplaints({
+    required String accessToken,
+  }) async {
+    final response = await http.get(
+      ApiConfig.endpoint(ApiConfig.myComplaints),
+      headers: _authHeaders(accessToken),
+    );
+    if (response.statusCode != 200) {
+      throw ApiException(_errorMessage(response));
+    }
+    return _jsonList(
+      response,
+    ).map((item) => ArizaModel.fromJson(item)).toList();
+  }
+
+  /// Konum bilgisi verilirse yalnızca kullanıcının çevresini etkileyen aktif
+  /// duyurular döner; konum izni yoksa şehir geneli akış gösterilir.
+  Future<List<DuyuruModel>> getAnnouncements({
+    required String accessToken,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final query = <String, String>{};
+    if (latitude != null && longitude != null) {
+      query['enlem'] = latitude.toString();
+      query['boylam'] = longitude.toString();
+    }
+    final response = await http.get(
+      ApiConfig.endpoint(ApiConfig.announcements, query: query),
+      headers: _authHeaders(accessToken),
+    );
+    if (response.statusCode != 200) {
+      throw ApiException(_errorMessage(response));
+    }
+    return _jsonList(
+      response,
+    ).map((item) => DuyuruModel.fromJson(item)).toList();
+  }
+
+  Future<List<RandevuModel>> getMyAppointments({
+    required String accessToken,
+  }) async {
+    final response = await http.get(
+      ApiConfig.endpoint(ApiConfig.myAppointments),
+      headers: _authHeaders(accessToken),
+    );
+    if (response.statusCode != 200) {
+      throw ApiException(_errorMessage(response));
+    }
+    return _jsonList(
+      response,
+    ).map((item) => RandevuModel.fromJson(item)).toList();
+  }
+
+  Future<List<String>> getAvailableAppointmentTimes({
+    required String department,
+    required DateTime date,
+    required String accessToken,
+  }) async {
+    final dateLabel =
+        '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final response = await http.get(
+      ApiConfig.endpoint(
+        ApiConfig.availableAppointmentTimes,
+        query: {'birim': department, 'tarih': dateLabel},
+      ),
+      headers: _authHeaders(accessToken),
+    );
+    if (response.statusCode != 200) {
+      throw ApiException(_errorMessage(response));
+    }
+    try {
+      return (jsonDecode(response.body) as List<dynamic>)
+          .map((item) => item.toString())
+          .toList();
+    } catch (_) {
+      throw const ApiException('Uygun randevu saatleri okunamadı.');
+    }
+  }
+
+  Future<RandevuModel> createAppointment({
+    required String department,
+    required DateTime dateTime,
+    required String subject,
+    required String accessToken,
+  }) async {
+    final response = await http.post(
+      ApiConfig.endpoint(ApiConfig.appointments),
+      headers: _jsonHeaders(accessToken),
+      body: jsonEncode({
+        'birim': department,
+        'tarihSaat': dateTime.toUtc().toIso8601String(),
+        'konu': subject,
+      }),
+    );
+    if (response.statusCode != 201) {
+      throw ApiException(_errorMessage(response));
+    }
+    return RandevuModel.fromJson(_jsonMap(response));
+  }
+
+  Future<void> cancelAppointment({
+    required int appointmentId,
+    required String accessToken,
+  }) async {
+    final response = await http.put(
+      ApiConfig.endpoint('${ApiConfig.appointments}/$appointmentId/iptal'),
+      headers: _authHeaders(accessToken),
+    );
+    if (response.statusCode != 204) {
+      throw ApiException(_errorMessage(response));
+    }
+  }
+
   Future<void> updateComplaintStatus({
     required int complaintId,
     required String status,
@@ -203,6 +320,17 @@ class ApiService {
       return Map<String, dynamic>.from(jsonDecode(response.body) as Map);
     } catch (_) {
       return {};
+    }
+  }
+
+  List<Map<String, dynamic>> _jsonList(http.Response response) {
+    try {
+      return (jsonDecode(response.body) as List<dynamic>)
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    } catch (_) {
+      throw const ApiException('Sunucudan gelen liste okunamadı.');
     }
   }
 
